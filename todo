@@ -1,13 +1,16 @@
-Use premade program
+# TODO List for Project
 
-Add db relationships
-CHECK FOR REPORTS THEY KNOW THEY WANT BUT NEED TO BE GENERATED
-Requirements
-Data Dictionary
-Meet with customer agent
-Docs
+- Check customer requirements
+  1. Add more db relationships ()
+  2. Add more filter options / scopes (for report generation)
+- Consolidate Requirements
+- Data Dictionary
+- Meet with customer agent
+- Docs
 
-Think about Registration Flows
-Provided vs Needs
+## Mindset
 
-Don't Reinvent the Wheel - Use The Provided Program + Open Source Libraries
+- Registration Flows (signups, etc.)
+- Consider program's current features vs customer requirements (spoken/inferred)
+- Don't "Reinvent the Wheel"; Use Open Source Libraries, etc
+- Reference `notes/`
