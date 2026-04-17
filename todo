@@ -1,5 +1,9 @@
 # TODO List for Project
 
+- Provided Requirements `notes/requirements.md`:
+  - Verify items `2`, `3`, `4`
+  - Implement items `1`, `5`, `6`, `7`
+
 - Check customer requirements
   1. Add more db relationships ()
   2. Add more filter options / scopes (for report generation)
