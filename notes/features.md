@@ -104,5 +104,6 @@ policies will b avail for creation
 ## My Suggestions
 
 1. Security
-   - Login: Replace "not in system" with "invalid credentials"
-   - Login: Sign-Up option listed below login
+   - Auth/Login: Replace "not in system" with "invalid credentials"
+   - Auth/Login: ~~Sign-Up~~ contact support option listed below login
+   - Auth/Login: Session Timeout (after inactivity)
