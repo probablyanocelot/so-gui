@@ -22,7 +22,8 @@ import sqlite3
 from pathlib import Path
 from datetime import datetime   #import libraries
 
-DB_PATH = Path("cams.db")   #define path so program can find databse
+# DB_PATH = Path("cams.db")   #define path so program can find databse
+DB_PATH = Path(__file__).resolve().parent.parent / "sogui.db"
 
 """This function opens a connection to the soGUI SQLite database and 
 turns on row_factory so query results can be accessed like dictionaries 
@@ -39,6 +40,8 @@ def get_connection():
 def init_db():
     conn = get_connection()
     cur = conn.cursor()
+    conn.execute("PRAGMA foreign_keys = ON;")  # Enable foreign key support in SQLite
+    
 
     #Each commented section maps to a table group
     #
@@ -77,7 +80,9 @@ def init_db():
     # such as changes to assets or checkouts. It stores which asset and employee 
     # were involved, what happened, when it happened, and any extra details 
     # for later review.
-    cur.executescript("""
+    
+def create_user_table(conn):
+    conn.execute("""
     -- ======================
     -- User (employees/admins)
     -- ======================
@@ -90,7 +95,10 @@ def init_db():
         ROLE        TEXT NOT NULL,      -- 'admin' or 'standard'
         PASSWORD    TEXT                -- for class: plain text is OK
     );
-
+    """)
+    
+def create_customer_table(conn):
+    conn.execute("""
     -- ======================
     -- Customers
     -- ======================
@@ -100,7 +108,10 @@ def init_db():
         LAST_NAME   TEXT NOT NULL,
         PHONE       TEXT
     );
-
+    """)
+        
+def create_lookup_tables(conn):
+    conn.execute("""
     -- ======================
     -- Site / Location / Department / Category lookups
     -- ======================
@@ -123,7 +134,10 @@ def init_db():
         CATEGORY_ID   INTEGER PRIMARY KEY AUTOINCREMENT,
         CATEGORY_NAME TEXT NOT NULL UNIQUE
     );
+    """)
 
+def create_asset_table(conn):
+    conn.execute("""    
     -- ======================
     -- Asset (inventory items)
     -- ======================
@@ -150,7 +164,9 @@ def init_db():
         FOREIGN KEY (DEPT_NAME)      REFERENCES Department(DEPT_NAME),
         FOREIGN KEY (CATEGORY_NAME)  REFERENCES Category(CATEGORY_NAME)
     );
-
+""")
+def create_checkout_table(conn):
+    conn.execute("""
     -- ======================
     -- Checkout history
     -- ======================
@@ -165,7 +181,11 @@ def init_db():
         FOREIGN KEY (CUST_EMAIL) REFERENCES Customers(CUST_EMAIL),
         FOREIGN KEY (ASSET_ID)   REFERENCES Asset(ASSET_ID)
     );
+    """)
 
+
+def create_reservation_table(conn):
+    conn.execute("""
     -- ======================
     -- Reservations (new design)
     -- ======================
@@ -181,6 +201,9 @@ def init_db():
         FOREIGN KEY (ASSET_ID)     REFERENCES Asset(ASSET_ID),
         FOREIGN KEY (REQUESTED_BY) REFERENCES User(EMP_ID)
     );
+    """)
+def create_policy_table(conn):
+    conn.execute("""
 
     -- ======================
     -- Policy
@@ -190,7 +213,10 @@ def init_db():
         POLICY_ONE   TEXT,
         POLICY_TWO   TEXT,
         POLICY_THREE TEXT
-    );
+    );""")
+    
+def create_audit_log_table(conn):
+    conn.execute("""
 
     -- ======================
     -- Audit Log
