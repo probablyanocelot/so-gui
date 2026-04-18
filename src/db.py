@@ -139,6 +139,9 @@ def init_db():
         LOCATION_NAME   TEXT,
         DEPT_NAME       TEXT,
         CATEGORY_NAME   TEXT,
+        FUNDING_SOURCE  TEXT,     -- optional text field for where the money came from
+        QUANTITY        INTEGER,
+        WARRANTY_INFO   TEXT,     -- optional text field for warranty details
         IMAGE_PATH      TEXT,     -- optional path to an image for this asset
         AVAILABLE       INTEGER NOT NULL DEFAULT 1,  -- 1=true, 0=false
 

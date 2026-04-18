@@ -397,6 +397,9 @@ def get_assets(search_term=None):
                 OR LOCATION_NAME LIKE ?
                 OR DEPT_NAME   LIKE ?
                 OR CATEGORY_NAME LIKE ?
+                OR FUNDING_SOURCE LIKE ?
+                OR QUANTITY LIKE ?
+                OR WARRANTY_INFO LIKE ?
             ORDER BY ASSET_ID
             """,
             (like, like, like, like, like, like, like, like, like),
@@ -430,6 +433,9 @@ def get_inventory_report(search_term=None, filter_field=None,
         "Location": "LOCATION_NAME",
         "Department": "DEPT_NAME",
         "Category": "CATEGORY_NAME",
+        "Funding Source": "FUNDING_SOURCE",
+        "Quantity": "QUANTITY",
+        "Warranty Info": "WARRANTY_INFO",
     }
 
     conn = get_connection()
@@ -448,7 +454,10 @@ def get_inventory_report(search_term=None, filter_field=None,
             CATEGORY_NAME,
             AVAILABLE,
             PURCHASE_DATE,
-            COST
+            COST,
+            FUNDING_SOURCE,
+            QUANTITY,
+            WARRANTY_INFO
         FROM Asset
         WHERE 1=1
     """
@@ -526,6 +535,9 @@ def get_asset(asset_id):
             SERIAL,
             PURCHASE_DATE,
             COST,
+            QUANTITY,
+            FUNDING_SOURCE,
+            WARRANTY_INFO,
             SITE_NAME,
             LOCATION_NAME,
             DEPT_NAME,
