@@ -15,11 +15,11 @@ Description:
 
 import customtkinter as ctk
 
-from .inventory_view import InventoryView
-from .users_view import UsersView
-from .checkout_view import CheckoutView
-from .reports_view import ReportsView
-from .login_view import LoginView
+from ..old.inventory_view import InventoryView
+from ..old.users_view import UsersView
+from ..old.checkout_view import CheckoutView
+from ..old.reports_view import ReportsView
+from ..old.login_view import LoginView
 
 
 class soGUIApp(ctk.CTk):
