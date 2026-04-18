@@ -1,3 +1,6 @@
+import customtkinter as ctk
+from services import get_assets, get_asset, delete_asset
+
 try:
     import customtkinter
 except ImportError:
@@ -5,8 +8,8 @@ except ImportError:
     print("pip install -r requirements.txt")
     exit(1)
 from db import init_db
-from UI.app import soGUIApp
-from services import seed_default_admin
+# from UI.app import soGUIApp
+# from services import seed_default_admin
 
 def main():
     """
@@ -38,6 +41,48 @@ class InventoryView(ctk.CTkFrame):
         super().__init__(master, *args, **kwargs)
         self.acting_emp_id = acting_emp_id
         self.selected_asset_id = None
+        
+        
+                # ---------------- Bottom action buttons ----------------
+        bottom_frame = ctk.CTkFrame(self)
+        bottom_frame.pack(fill="x", padx=10, pady=(0, 10))
+
+        self.add_asset_btn = ctk.CTkButton(
+            bottom_frame,
+            text="Add Asset",
+            command=self.open_add_asset_window,
+        )
+        self.add_asset_btn.pack(side="right", padx=10)
+
+        self.edit_asset_btn = ctk.CTkButton(
+            bottom_frame,
+            text="Edit Asset",
+            state="disabled",
+            command=self.open_edit_asset_window,
+        )
+        self.edit_asset_btn.pack(side="right", padx=(10, 0))
+
+        self.delete_asset_btn = ctk.CTkButton(
+            bottom_frame,
+            text="Delete Asset",
+            state="disabled",
+            fg_color="#b91c1c",  # red-ish tone
+            hover_color="#ef4444",
+            command=self.delete_selected_asset,
+        )
+        self.delete_asset_btn.pack(side="right", padx=(10, 0))
+
+        self.maint_btn = ctk.CTkButton(
+            bottom_frame,
+            text="Add Maintenance Entry",
+            state="disabled",
+            command=self.open_maintenance_window,
+        )
+        self.maint_btn.pack(side="right")
+
+        self.status_label = ctk.CTkLabel(bottom_frame, text="")
+        self.status_label.pack(side="left", padx=10)
+
 
         # ---------------- Header row ----------------
         title_row = ctk.CTkFrame(self)
@@ -115,12 +160,87 @@ class InventoryView(ctk.CTkFrame):
         self.tree.bind("<<TreeviewSelect>>", self.on_tree_select)
         
         
+        preview_frame = ctk.CTkFrame(self)
+        preview_frame.pack(fill="x", padx=10, pady=(0, 10))
+
+        preview_label = ctk.CTkLabel(
+            preview_frame,
+            text="Image preview (click to open full size):",
+            anchor="w",
+        )
+        preview_label.pack(anchor="w")
+
+        self.preview_image_label = ctk.CTkLabel(
+            preview_frame,
+            text="No image",
+            width=150,
+            height=150,
+            corner_radius=8,
+        )
+        self.preview_image_label.pack(anchor="w", pady=(4, 0))
+        self.preview_image_label.bind("<Button-1>", self.open_full_image_window)
+        
         # Initial load of table
         self.refresh_table()
+        
+        
         
             # ============================================================
     # Table / search
     # ============================================================
+    def open_add_asset_window(self):
+        """
+        Open a dialog for creating a brand new asset.
+        Only Asset ID is required; everything else is optional.
+        """
+        win = ctk.CTkToplevel(self)
+        win.title("Add Asset")
+        win.geometry("500x550")
+        win.grab_set()
+
+        frame = ctk.CTkFrame(win)
+        frame.pack(fill="both", expand=True, padx=20, pady=20)
+        frame.grid_columnconfigure(1, weight=1)
+    
+    def open_edit_asset_window(self):
+        """
+        Open a dialog with the selected asset's info prefilled for editing.
+        """
+        if not self.selected_asset_id:
+            self.status_label.configure(text="Please select an asset to edit.", text_color="red")
+            return
+
+        row = get_asset(self.selected_asset_id)
+        if not row:
+            self.status_label.configure(text="Selected asset not found.", text_color="red")
+            return
+
+        win = ctk.CTkToplevel(self)
+        win.title(f"Edit Asset - {self.selected_asset_id}")
+        win.geometry("500x550")
+        win.grab_set()
+
+        frame = ctk.CTkFrame(win)
+        frame.pack(fill="both", expand=True, padx=20, pady=20)
+        frame.grid_columnconfigure(1, weight=1)
+
+    def open_maintenance_window(self):
+        """
+        Open a dialog to add a maintenance note for the selected asset.
+        The note is stored via add_maintenance_entry in the service layer.
+        """
+        if not self.selected_asset_id:
+            self.status_label.configure(text="Please select an asset first.", text_color="red")
+            return
+
+        win = ctk.CTkToplevel(self)
+        win.title(f"Add Maintenance Entry - {self.selected_asset_id}")
+        win.geometry("500x350")
+        win.grab_set()
+
+        frame = ctk.CTkFrame(win)
+        frame.pack(fill="both", expand=True, padx=20, pady=20)
+        frame.grid_columnconfigure(0, weight=1)
 
     def refresh_table(self):
         """
@@ -203,18 +323,89 @@ class InventoryView(ctk.CTkFrame):
 
         # Update thumbnail preview when selection changes
         self.update_image_preview()
+        
+    def open_full_image_window(self, event=None):
+        """
+        Open a larger view of the selected asset's image in a new pop-up window.
+        """
+        if not self.selected_asset_id:
+            return
+
+        row = get_asset(self.selected_asset_id)
+        if not row:
+            return
+
+        img_path = row["IMAGE_PATH"]
+        if not img_path:
+            return
+
+        try:
+            pil_img = Image.open(img_path)
+        except Exception:
+            return
+
+        win = ctk.CTkToplevel(self)
+        win.title(f"Image - {self.selected_asset_id}")
+        win.geometry("650x650")
+        win.grab_set()
+
+        # Resize image to fit nicely in the window
+        max_size = (600, 600)
+        pil_img.thumbnail(max_size)
+
+        full_image = ctk.CTkImage(
+            light_image=pil_img,
+            dark_image=pil_img,
+            size=pil_img.size,
+        )
+
+        img_label = ctk.CTkLabel(win, image=full_image, text="")
+        img_label.image = full_image  # keep a reference on the label
+        img_label.pack(padx=20, pady=20)
+
+    def delete_selected_asset(self):
+        """
+        Delete the currently selected asset after a confirmation dialog.
+        """
+        if not self.selected_asset_id:
+            self.status_label.configure(text="Please select an asset to delete.", text_color="red")
+            return
+
+        answer = messagebox.askyesno(
+            "Delete Asset",
+            f"Are you sure you want to delete asset '{self.selected_asset_id}'?\nThis cannot be undone.",
+        )
+        if not answer:
+            return
+
+        try:
+            delete_asset(self.selected_asset_id, acting_emp_id=self.acting_emp_id)
+        except Exception as e:
+            self.status_label.configure(text=f"Error deleting asset: {e}", text_color="red")
+            return
+
+        self.status_label.configure(
+            text=f"Deleted asset: {self.selected_asset_id}",
+            text_color="white",
+        )
+        self.refresh_table()
+
 
 
 if __name__ == "__main__":
+    # This block allows us to run this view in isolation for testing/debugging purposes.
     import os
     import sys
+    
+    from tkinter import ttk
+    
 
     # Make src/ importable when running this file directly
     sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 
     import customtkinter as ctk
     from db import init_db
-    from services import seed_default_admin
+    from database import seed_default_admin
 
     # Optional: initialize DB state for view testing
     init_db()

@@ -1,0 +1,1 @@
+from .setup import seed_default_admin
