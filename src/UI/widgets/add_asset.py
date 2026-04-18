@@ -95,3 +95,58 @@
 
         cancel_btn = ctk.CTkButton(btn_frame, text="Cancel", fg_color="gray", command=win.destroy)
         cancel_btn.pack(side="right")
+
+    def save_asset(self, window):
+        """
+        Read the add-asset form, validate, and create a new asset record.
+        Closes the dialog and refreshes the table on success.
+        """
+        asset_id = self.asset_id_var.get().strip()
+        if not asset_id:
+            print("Asset ID is required.")
+            return
+
+        description = self.description_var.get().strip() or None
+        brand = self.brand_var.get().strip() or None
+        model = self.model_var.get().strip() or None
+        serial = self.serial_var.get().strip() or None
+        purchase_date = self.purchase_date_var.get().strip() or None
+        site = self.site_var.get().strip() or None
+        location = self.location_var.get().strip() or None
+        dept = self.dept_var.get().strip() or None
+        category = self.category_var.get().strip() or None
+        image_path = self.image_path_var.get().strip() or None
+        available = self.available_var.get()
+
+        cost_value = None
+        cost_str = self.cost_var.get().strip()
+        if cost_str:
+            try:
+                cost_value = float(cost_str)
+            except ValueError:
+                print("Cost must be a number.")
+                return
+
+        try:
+            create_asset(
+                asset_id=asset_id,
+                description=description,
+                brand=brand,
+                model=model,
+                serial=serial,
+                purchase_date=purchase_date,
+                cost=cost_value,
+                site_name=site,
+                location_name=location,
+                dept_name=dept,
+                category_name=category,
+                image_path=image_path,
+                available=available,
+                acting_emp_id=self.acting_emp_id,
+            )
+        except Exception as e:
+            print("Error creating asset:", e)
+            return
+
+        window.destroy()
+        self.refresh_table()
