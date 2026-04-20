@@ -95,8 +95,11 @@ class CheckoutView(ctk.CTkFrame):
         lbl_assets.pack(pady=(0, 5))
 
         # Treeview showing available assets only
+        assets_table_frame = ctk.CTkFrame(left)
+        assets_table_frame.pack(expand=True, fill="both")
+
         self.assets_tree = ttk.Treeview(
-            left,
+            assets_table_frame,
             columns=("ASSET_ID", "DESCRIPTION", "BRAND", "MODEL"),
             show="headings",
             height=12,
@@ -110,7 +113,16 @@ class CheckoutView(ctk.CTkFrame):
             self.assets_tree.heading(col, text=text)
             self.assets_tree.column(col, width=width)
 
-        self.assets_tree.pack(expand=True, fill="both")
+        vsb = ttk.Scrollbar(assets_table_frame, orient="vertical", command=self.assets_tree.yview)
+        hsb = ttk.Scrollbar(assets_table_frame, orient="horizontal", command=self.assets_tree.xview)
+        self.assets_tree.configure(yscrollcommand=vsb.set, xscrollcommand=hsb.set)
+
+        self.assets_tree.grid(row=0, column=0, sticky="nsew")
+        vsb.grid(row=0, column=1, sticky="ns")
+        hsb.grid(row=1, column=0, sticky="ew")
+
+        assets_table_frame.rowconfigure(0, weight=1)
+        assets_table_frame.columnconfigure(0, weight=1)
 
         # When a row is selected, we update the Asset ID in the form
         self.assets_tree.bind("<<TreeviewSelect>>", self.on_asset_select)
@@ -340,7 +352,16 @@ class CheckoutView(ctk.CTkFrame):
             self.active_tree.heading(col, text=text)
             self.active_tree.column(col, width=width)
 
-        self.active_tree.pack(expand=True, fill="both", pady=(5, 5))
+        vsb = ttk.Scrollbar(table_frame, orient="vertical", command=self.active_tree.yview)
+        hsb = ttk.Scrollbar(table_frame, orient="horizontal", command=self.active_tree.xview)
+        self.active_tree.configure(yscrollcommand=vsb.set, xscrollcommand=hsb.set)
+
+        self.active_tree.grid(row=0, column=0, sticky="nsew", pady=(5, 5))
+        vsb.grid(row=0, column=1, sticky="ns")
+        hsb.grid(row=1, column=0, sticky="ew")
+
+        table_frame.rowconfigure(0, weight=1)
+        table_frame.columnconfigure(0, weight=1)
 
         # When a row is selected, we store that asset_id for potential reservation
         self.active_tree.bind("<<TreeviewSelect>>", self.on_active_select)

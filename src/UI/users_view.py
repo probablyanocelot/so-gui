@@ -63,7 +63,16 @@ class UsersView(ctk.CTkFrame):
             self.tree.heading(col, text=text)
             self.tree.column(col, width=width)
 
-        self.tree.pack(expand=True, fill="both")
+        vsb = ttk.Scrollbar(table_frame, orient="vertical", command=self.tree.yview)
+        hsb = ttk.Scrollbar(table_frame, orient="horizontal", command=self.tree.xview)
+        self.tree.configure(yscrollcommand=vsb.set, xscrollcommand=hsb.set)
+
+        self.tree.grid(row=0, column=0, sticky="nsew")
+        vsb.grid(row=0, column=1, sticky="ns")
+        hsb.grid(row=1, column=0, sticky="ew")
+
+        table_frame.rowconfigure(0, weight=1)
+        table_frame.columnconfigure(0, weight=1)
 
         # When a row is selected, fill the form and switch to edit mode
         self.tree.bind("<<TreeviewSelect>>", self.on_tree_select)

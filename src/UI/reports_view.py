@@ -481,7 +481,16 @@ class ReportsView(ctk.CTkFrame):
             self.audit_tree.heading(col, text=text)
             self.audit_tree.column(col, width=width)
 
-        self.audit_tree.pack(expand=True, fill="both")
+        vsb = ttk.Scrollbar(table_frame, orient="vertical", command=self.audit_tree.yview)
+        hsb = ttk.Scrollbar(table_frame, orient="horizontal", command=self.audit_tree.xview)
+        self.audit_tree.configure(yscrollcommand=vsb.set, xscrollcommand=hsb.set)
+
+        self.audit_tree.grid(row=0, column=0, sticky="nsew")
+        vsb.grid(row=0, column=1, sticky="ns")
+        hsb.grid(row=1, column=0, sticky="ew")
+
+        table_frame.rowconfigure(0, weight=1)
+        table_frame.columnconfigure(0, weight=1)
 
         # Bottom: status + export
         bottom = ctk.CTkFrame(outer)
@@ -690,7 +699,16 @@ class ReportsView(ctk.CTkFrame):
             self.maint_tree.heading(col, text=text)
             self.maint_tree.column(col, width=width)
 
-        self.maint_tree.pack(expand=True, fill="both")
+        vsb = ttk.Scrollbar(table_frame, orient="vertical", command=self.maint_tree.yview)
+        hsb = ttk.Scrollbar(table_frame, orient="horizontal", command=self.maint_tree.xview)
+        self.maint_tree.configure(yscrollcommand=vsb.set, xscrollcommand=hsb.set)
+
+        self.maint_tree.grid(row=0, column=0, sticky="nsew")
+        vsb.grid(row=0, column=1, sticky="ns")
+        hsb.grid(row=1, column=0, sticky="ew")
+
+        table_frame.rowconfigure(0, weight=1)
+        table_frame.columnconfigure(0, weight=1)
 
         # Bottom: status + export
         bottom = ctk.CTkFrame(outer)
